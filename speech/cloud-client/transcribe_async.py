@@ -24,9 +24,9 @@ Example usage:
 
 import argparse
 import io
-import time
 
 
+# [START def_transcribe_file]
 def transcribe_file(speech_file):
     """Transcribe the given audio file asynchronously."""
     from google.cloud import speech
@@ -48,23 +48,18 @@ def transcribe_file(speech_file):
     operation = client.long_running_recognize(config, audio)
     # [END migration_async_request]
 
-    # Sleep and poll operation.done()
-    retry_count = 100
-    while retry_count > 0 and not operation.done():
-        retry_count -= 1
-        time.sleep(2)
+    print('Waiting for operation to complete...')
+    result = operation.result(timeout=90)
 
-    if not operation.done():
-        print('Operation not complete and retry limit reached.')
-        return
-
-    alternatives = operation.result().results[0].alternatives
+    alternatives = result.results[0].alternatives
     for alternative in alternatives:
         print('Transcript: {}'.format(alternative.transcript))
         print('Confidence: {}'.format(alternative.confidence))
     # [END migration_async_response]
+# [END def_transcribe_file]
 
 
+# [START def_transcribe_gcs]
 def transcribe_gcs(gcs_uri):
     """Asynchronously transcribes the audio file specified by the gcs_uri."""
     from google.cloud import speech
@@ -80,19 +75,14 @@ def transcribe_gcs(gcs_uri):
 
     operation = client.long_running_recognize(config, audio)
 
-    retry_count = 100
-    while retry_count > 0 and not operation.done():
-        retry_count -= 1
-        time.sleep(2)
+    print('Waiting for operation to complete...')
+    result = operation.result(timeout=90)
 
-    if not operation.done():
-        print('Operation not complete and retry limit reached.')
-        return
-
-    alternatives = operation.result().results[0].alternatives
+    alternatives = result.results[0].alternatives
     for alternative in alternatives:
         print('Transcript: {}'.format(alternative.transcript))
         print('Confidence: {}'.format(alternative.confidence))
+# [END def_transcribe_gcs]
 
 
 if __name__ == '__main__':
